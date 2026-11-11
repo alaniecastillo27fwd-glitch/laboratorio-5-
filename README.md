@@ -1,12 +1,12 @@
 # Laboratorio #5: API REST con Express y Swagger integrando DeepSeek AI
 
-## 👥 Integrantes y Roles
-- **Integrante A:** API REST y CRUD de notas, validación con Zod, configuración de Swagger.
+## Integrantes y Roles
+- **Integrante A (Andrés):** API REST y CRUD de notas, validación con Zod, configuración de Swagger.
 - **Integrante B (Alanie):** Integración con DeepSeek AI (OpenAI SDK), endpoints de IA (`/api/ia/preguntar`, `/api/notas/:id/resumen`), manejo centralizado de errores y seguridad de credenciales.
 
 ---
 
-## 🚀 Requisitos e Instalación
+## Requisitos e Instalación
 
 ### Requisitos previos
 - Node.js 20 o superior
@@ -38,7 +38,7 @@ La documentación interactiva estará disponible en: `http://localhost:3000/api-
 
 ---
 
-## 🧠 Preguntas de Reflexión
+## Preguntas de Reflexión
 
 ### 1. ¿Por qué la API key no puede estar en el frontend?
 **Respuesta:**  
