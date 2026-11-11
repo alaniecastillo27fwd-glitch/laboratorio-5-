@@ -58,3 +58,4 @@ async function preguntar(texto, system) {
 module.exports = {
   preguntar,
 };
+

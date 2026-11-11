@@ -131,3 +131,4 @@ Nos reunimos en sesión de revisión de código (Pair Programming), abrimos el e
 4. Verificamos que se ejecutara una sola exportación `module.exports = router;`.
 5. Ejecutamos la suite de pruebas cruzadas en Swagger UI antes de aprobar y completar el merge con el commit:
    `merge: resolve integration conflicts in notas.routes.js for IA summary endpoint`.
+
