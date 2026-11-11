@@ -5,6 +5,7 @@ const { z } = require("zod");
 const validar = require("../middlewares/validar");
 
 const notas = require("../services/notas.service");
+const deepseek = require("../services/deepseek.service"); // Integración con IA (Integrante B)
 
 // Esquema para validar las notas
 const notaSchema = z.object({
@@ -62,7 +63,7 @@ router.get("/", (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID de la nota
+ *         description: ID numérico de la nota a consultar
  *         schema:
  *           type: integer
  *           minimum: 1
@@ -94,7 +95,7 @@ router.get("/:id", (req, res) => {
 });
 
 // ============================================
-// POST /api/notas - CREAR UNA NOTA
+// POST /api/notas - CREAR UNA NUEVA NOTA
 // ============================================
 
 /**
@@ -102,7 +103,7 @@ router.get("/:id", (req, res) => {
  * /api/notas:
  *   post:
  *     summary: Crear una nueva nota
- *     description: Registra una nota con título y contenido.
+ *     description: Registra una nueva nota con título y contenido validados.
  *     tags: [Notas]
  *     requestBody:
  *       required: true
@@ -116,23 +117,19 @@ router.get("/:id", (req, res) => {
  *             properties:
  *               titulo:
  *                 type: string
- *                 minLength: 1
- *                 maxLength: 100
- *                 example: Mi primera nota
+ *                 example: "Aprender Express"
  *               contenido:
  *                 type: string
- *                 minLength: 1
- *                 maxLength: 5000
- *                 example: Este es el contenido de mi nota.
+ *                 example: "Construir APIs REST profesionales con Express y Swagger"
  *     responses:
  *       201:
- *         description: Nota creada correctamente
+ *         description: Nota creada exitosamente
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Nota'
  *       400:
- *         description: Datos inválidos
+ *         description: Datos de entrada inválidos
  */
 
 router.post("/", validar(notaSchema), (req, res) => {
@@ -181,6 +178,81 @@ router.delete("/:id", (req, res) => {
   notas.eliminar(id);
 
   res.status(204).send();
+});
+
+// ========================================================
+// POST /api/notas/:id/resumen - RESUMIR NOTA CON IA (B)
+// ========================================================
+
+/**
+ * @openapi
+ * /api/notas/{id}/resumen:
+ *   post:
+ *     summary: Resume una nota existente en 3 viñetas con IA
+ *     description: Busca una nota por su ID y genera un resumen estructurado en 3 viñetas mediante DeepSeek.
+ *     tags: [Notas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la nota a resumir
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *     responses:
+ *       200:
+ *         description: Resumen generado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notaId:
+ *                   type: integer
+ *                   example: 1
+ *                 resumen:
+ *                   type: string
+ *                   example: "• Primer punto clave\n• Segundo punto clave\n• Tercer punto clave"
+ *       400:
+ *         description: ID inválido
+ *       404:
+ *         description: Nota no encontrada
+ *       502:
+ *         description: Servicio de IA no disponible
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "IA_NO_DISPONIBLE"
+ */
+
+router.post("/:id/resumen", async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "El ID debe ser un número entero positivo",
+      });
+    }
+
+    const nota = notas.buscar(id); // Lanza AppError 404 si no existe
+
+    const r = await deepseek.preguntar(
+      nota.contenido,
+      "Resume el texto en 3 viñetas breves, en español."
+    );
+
+    res.status(200).json({
+      notaId: nota.id,
+      resumen: r.respuesta,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Exportar router
